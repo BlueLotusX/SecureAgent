@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CogAgent - SecureAgentPolyU</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- 左侧导航栏 -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h2 class="sidebar-title">SecureAgentPolyU</h2>
+            <p class="sidebar-subtitle">The Hong Kong Polytechnic University (PolyU)</p>
+        </div>
+        
+        <div class="sidebar-menu">
+            <!-- Agent/LLM 折叠菜单 -->
+            <div class="menu-section">
+                <div class="menu-header" onclick="toggleMenu('agentMenu')">
+                    <span>Agent/LLM</span>
+                    <span class="menu-arrow" id="agentArrow"></span>
+                </div>
+                <div class="menu-items" id="agentMenu">
+                    <a href="#" class="menu-item active">
+                        <span>CogAgent</span>
+                    </a>
+                    <div class="menu-item disabled">
+                        <span>DeepSeek</span>
+                        <span class="dev-badge">In Development</span>
+                    </div>
+                    <div class="menu-item disabled">
+                        <span>ChatGPT</span>
+                        <span class="dev-badge">In Development</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Attack/Defense 折叠菜单 -->
+            <div class="menu-section">
+                <div class="menu-header" onclick="toggleMenu('attackMenu')">
+                    <span>Attack/Defense</span>
+                    <span class="menu-arrow" id="attackArrow"></span>
+                </div>
+                <div class="menu-items" id="attackMenu">
+                    <a href="https://github.com/caoymg/GUI_AgentAttack" target="_blank" class="menu-item">
+                        <span>GUI_AgentAttack</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </a>
+                    <div class="menu-item disabled">
+                        <span>More Methods</span>
+                        <span class="dev-badge">In Development</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- About 链接 -->
+        <div class="sidebar-footer">
+            <a href="https://jackhexiangyu12.github.io/Secure-AI-Agent/" target="_blank" class="about-link">
+                About SecureAgentPolyU
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+            </a>
+        </div>
+    </nav>
+
+    <div class="main-wrapper">
+        <div class="container">
+            <!-- 标题区域 -->
+            <header class="header">
+                <h1 class="title">SecureAgentPolyU</h1>
+                <p class="subtitle">CogAgent - AI Agent for GUI Understanding and Interaction</p>
+            </header>
+
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <!-- 左侧：图片区域（上下布局） -->
+            <section class="left-section">
+                <div class="image-card">
+                    <label class="card-label">Upload a Screenshot</label>
+                    <div class="image-upload-area" id="uploadArea">
+                        <input type="file" id="imageInput" accept="image/*" hidden>
+                        <div class="upload-placeholder" id="uploadPlaceholder">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <p>Click or drag image here to upload</p>
+                        </div>
+                        <img id="uploadedImage" class="uploaded-image" style="display: none;">
+                    </div>
+                </div>
+
+                <div class="image-card">
+                    <label class="card-label">Annotated Image</label>
+                    <div class="image-display-area" id="resultArea">
+                        <div class="result-placeholder">
+                            <p>Annotated results will be displayed here</p>
+                        </div>
+                        <img id="resultImage" class="result-image" style="display: none;">
+                    </div>
+                </div>
+            </section>
+
+            <!-- 右侧：交互区域 -->
+            <section class="right-section">
+                <div class="chat-card">
+                    <label class="card-label">Chatbot</label>
+                    <div class="chatbot-area" id="chatbot">
+                        <div class="chat-empty">Start conversation...</div>
+                    </div>
+                </div>
+
+                <div class="input-card">
+                    <label class="card-label">Task</label>
+                    <textarea id="taskInput" class="task-input" placeholder="Input..." rows="3"></textarea>
+                </div>
+
+                <button id="submitBtn" class="btn btn-primary">Submit</button>
+                
+                <div class="control-buttons">
+                    <button id="clearBtn" class="btn btn-secondary">Clear All History</button>
+                    <button id="stopBtn" class="btn btn-stop">Stop Now</button>
+                </div>
+                
+                <!-- Attack/Defense Methods -->
+                <div class="control-card attack-defense-card">
+                    <label class="card-label">Attack/Defense Methods</label>
+                    <a href="https://github.com/caoymg/GUI_AgentAttack" target="_blank" class="btn btn-attack">
+                        <svg class="github-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                        </svg>
+                        <span>GUI_AgentAttack</span>
+                    </a>
+                </div>
+            </section>
+        </main>
+
+            <!-- 页脚 -->
+            <footer class="footer">
+                <p>This Demo is for learning and communication purposes only.</p>
+            </footer>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    <script>
+        // 折叠菜单切换
+        function toggleMenu(menuId) {
+            const menu = document.getElementById(menuId);
+            const section = menu.parentElement;
+            
+            if (menu.style.display === 'none' || menu.style.display === '') {
+                menu.style.display = 'block';
+                section.classList.add('active');
+            } else {
+                menu.style.display = 'none';
+                section.classList.remove('active');
+            }
+        }
+        
+        // 初始化：默认展开所有菜单
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('agentMenu').style.display = 'block';
+            document.getElementById('agentMenu').parentElement.classList.add('active');
+            document.getElementById('attackMenu').style.display = 'block';
+            document.getElementById('attackMenu').parentElement.classList.add('active');
+        });
+    </script>
+</body>
+</html>
+
