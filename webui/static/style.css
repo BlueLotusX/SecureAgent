@@ -1,0 +1,527 @@
+/* SecureAgent WebUI - Custom Styles */
+/* Works with Tailwind CSS + daisyUI */
+
+/* Base background fix */
+html, body {
+    background-color: oklch(var(--b2));
+}
+
+/* Animations */
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.5s ease-out;
+}
+
+.animate-slide-up {
+    animation: slide-up 0.4s ease-out;
+}
+
+/* Message container */
+.message-container {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding: 0 4px;
+    min-width: 0;
+}
+
+.message-container.user {
+    flex-direction: row-reverse;
+}
+
+.message-container.assistant {
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+/* Agent avatar - gradient style like logo */
+.agent-avatar {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    margin-top: 2px; /* Align with first line of text */
+}
+
+/* Thinking panel - single box, above reply; collapse when done；宽度与回复一致，展开/折叠不变 */
+.thinking-panel {
+    margin-top: 4px;
+    margin-bottom: 10px;
+    width: 100%;
+    min-width: 0;
+    font-size: 0.875rem;
+    color: oklch(var(--bc) / 0.75);
+    border-radius: 12px;
+    border: 1px solid oklch(var(--bc) / 0.12);
+    background: oklch(var(--b2));
+    overflow: hidden;
+}
+
+/* 流式与结束时同一外框：边框、圆角、背景一致，从 planning 开始即对齐 */
+.thinking-panel.thinking-streaming {
+    min-height: 44px;
+}
+
+.thinking-panel.thinking-streaming .thinking-summary-expanded {
+    border-radius: 0 0 12px 12px;
+}
+
+.thinking-panel.thinking-streaming .thinking-content {
+    min-height: 60px;
+    border-radius: 0 0 12px 12px;
+}
+
+.thinking-summary-collapsed {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: oklch(var(--b3));
+    border: none;
+    min-height: 40px;
+}
+
+/* 展开时折叠条只保留上圆角，与内容区无缝衔接，避免下方露线 */
+.thinking-panel.thinking-expanded .thinking-summary-collapsed {
+    border-radius: 12px 12px 0 0;
+}
+
+.thinking-summary-collapsed:hover {
+    background: oklch(var(--bc) / 0.08);
+}
+
+.thinking-summary-text {
+    font-weight: 500;
+}
+
+.thinking-summary-total {
+    color: oklch(var(--bc) / 0.5);
+}
+
+/* 折线三角形箭头（与示例 webui 一致：仅右边与下边描边，旋转表示展开/收起） */
+.thinking-summary-arrow {
+    margin-left: auto;
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid oklch(var(--bc) / 0.6);
+    border-bottom: 2px solid oklch(var(--bc) / 0.6);
+    transform: rotate(45deg);
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+}
+
+.thinking-summary-arrow.thinking-arrow-expanded {
+    transform: rotate(-45deg);
+}
+
+.thinking-summary-expanded {
+    overflow: hidden;
+    max-height: 0;
+    min-width: 0;
+    transition: max-height 0.3s ease-out;
+}
+
+.thinking-panel.thinking-expanded .thinking-summary-expanded,
+.thinking-panel.thinking-streaming .thinking-summary-expanded {
+    max-height: 80vh;
+}
+
+.thinking-content {
+    padding: 10px 12px 12px;
+    max-height: 60vh;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border-top: 1px solid oklch(var(--bc) / 0.08);
+}
+
+/* 展开时内容区底部圆角与面板一致，形成整体圆角框 */
+.thinking-panel.thinking-expanded .thinking-content {
+    border-radius: 0 0 12px 12px;
+}
+
+/* Continuous step blocks inside single box (no per-step cards) */
+.thinking-step-wrap {
+    margin-bottom: 6px;
+    min-width: 0;
+    animation: thinking-fade-in 0.25s ease-out;
+}
+
+.thinking-step-wrap:last-child {
+    margin-bottom: 0;
+}
+
+@keyframes thinking-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.thinking-step-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    cursor: default;
+    font-weight: 500;
+}
+
+.thinking-step-head[data-step-idx] {
+    cursor: pointer;
+}
+
+.thinking-step-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.thinking-step-time {
+    color: oklch(var(--bc) / 0.6);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.8em;
+}
+
+/* 步骤展开图标：折线三角形（与主箭头一致，尺寸略小） */
+.thinking-step-toggle {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-right: 1.5px solid oklch(var(--bc) / 0.5);
+    border-bottom: 1.5px solid oklch(var(--bc) / 0.5);
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.thinking-step-toggle.thinking-step-toggle-expanded {
+    transform: rotate(-135deg);
+}
+
+/* 防撑开：强制换行与宽高限制，避免长 URL/长串撑开框 */
+.thinking-step-body {
+    padding: 6px 0 8px 0;
+    padding-left: 10px;
+    border-left: 2px solid oklch(var(--bc) / 0.15);
+    margin-left: 4px;
+    background: oklch(var(--b1) / 0.5);
+    border-radius: 0 6px 6px 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;    /* 允许在任何字符处断行（含长 URL） */
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    font-size: 0.85em;
+    color: oklch(var(--bc) / 0.85);
+}
+
+.thinking-step-current .thinking-step-head {
+    font-style: italic;
+    color: oklch(var(--bc) / 0.9);
+}
+
+.thinking-step-spinner {
+    width: 12px;
+    height: 12px;
+    border: 2px solid oklch(var(--bc) / 0.2);
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: thinking-spin 0.8s linear infinite;
+}
+
+@keyframes thinking-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Chat bubbles */
+.chat-bubble-user {
+    background-color: oklch(var(--bc) / 0.08);
+    color: oklch(var(--bc));
+    border-radius: 18px 18px 4px 18px;
+    padding: 12px 16px;
+    max-width: 70%;
+    line-height: 1.6;
+}
+
+/* Assistant content - no bubble, just text；flex:1 固定占满剩余空间，避免展开/折叠时宽度变化 */
+.assistant-content {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 90%;
+    color: oklch(var(--bc));
+    line-height: 1.7;
+}
+
+/* Messages container */
+.messages-container {
+    position: relative;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.messages-container::-webkit-scrollbar {
+    display: none;
+}
+
+/* Input area with fade effect at top */
+.input-area {
+    position: relative;
+}
+
+.input-area::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(to top, oklch(var(--b2)) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Input container - theme adaptive */
+.input-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    background-color: oklch(var(--b1));
+    border-radius: 20px;
+    padding: 8px 8px 8px 16px;
+    box-shadow: 0 2px 8px oklch(var(--bc) / 0.06);
+    transition: box-shadow 0.2s ease;
+}
+
+.input-container:focus-within {
+    box-shadow: 0 4px 16px oklch(var(--bc) / 0.1);
+}
+
+.message-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    padding: 8px 0;
+    min-height: 40px;
+    max-height: 120px;
+    color: oklch(var(--bc));
+}
+
+.message-input::placeholder {
+    color: oklch(var(--bc) / 0.4);
+}
+
+/* Send button - adaptive with highlight when has content */
+.send-btn {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 12px;
+    border: none;
+    background-color: oklch(var(--bc) / 0.08);
+    color: oklch(var(--bc) / 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: not-allowed;
+    transition: all 0.2s ease;
+}
+
+.send-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.send-btn.active:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+}
+
+/* Markdown content */
+.markdown-content {
+    line-height: 1.7;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4 {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    font-weight: 600;
+}
+
+.markdown-content h1 { font-size: 1.4em; }
+.markdown-content h2 { font-size: 1.25em; }
+.markdown-content h3 { font-size: 1.1em; }
+
+.markdown-content p {
+    margin: 0.5em 0;
+}
+
+.markdown-content p:first-child {
+    margin-top: 0;
+}
+
+.markdown-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Fix: Add list markers */
+.markdown-content ul {
+    list-style-type: disc;
+    margin: 0.5em 0;
+    padding-left: 1.5em;
+}
+
+.markdown-content ol {
+    list-style-type: decimal;
+    margin: 0.5em 0;
+    padding-left: 1.5em;
+}
+
+.markdown-content li {
+    margin: 0.25em 0;
+}
+
+.markdown-content strong {
+    font-weight: 700;
+}
+
+.markdown-content blockquote {
+    margin: 0.75em 0;
+    padding: 0.5em 1em;
+    border-left: 4px solid #667eea;
+    background: oklch(var(--bc) / 0.05);
+    border-radius: 0 0.5em 0.5em 0;
+}
+
+.markdown-content blockquote p {
+    margin: 0;
+}
+
+/* Code blocks */
+.markdown-content pre {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 1em;
+    border-radius: 0.5em;
+    overflow-x: auto;
+    margin: 0.75em 0;
+    font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.markdown-content pre code {
+    background: transparent;
+    padding: 0;
+    font-size: inherit;
+    color: inherit;
+}
+
+.markdown-content code {
+    background: oklch(var(--bc) / 0.1);
+    color: #667eea;
+    padding: 0.125em 0.375em;
+    border-radius: 0.25em;
+    font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+    font-size: 0.9em;
+}
+
+/* Tables */
+.markdown-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.75em 0;
+    font-size: 0.9em;
+}
+
+.markdown-content th,
+.markdown-content td {
+    padding: 0.625em 0.75em;
+    border: 1px solid oklch(var(--bc) / 0.2);
+    text-align: left;
+}
+
+.markdown-content th {
+    background: oklch(var(--bc) / 0.05);
+    font-weight: 600;
+}
+
+.markdown-content tr:nth-child(even) {
+    background: oklch(var(--bc) / 0.03);
+}
+
+/* Horizontal rule */
+.markdown-content hr {
+    border: none;
+    border-top: 1px solid oklch(var(--bc) / 0.2);
+    margin: 1em 0;
+}
+
+/* Links */
+.markdown-content a {
+    color: #667eea;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+.markdown-content a:hover {
+    border-bottom-color: #667eea;
+}
+
+/* Images */
+.markdown-content img {
+    max-width: 100%;
+    border-radius: 0.5em;
+    margin: 0.5em 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    aside {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    aside.open {
+        transform: translateX(0);
+    }
+    
+    main {
+        margin-left: 0 !important;
+    }
+}

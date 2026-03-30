@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureAgent - AI Assistant</title>
+    
+    <!-- Tailwind CSS + daisyUI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4/dist/full.min.css" rel="stylesheet">
+    
+    <!-- Iconify Icons -->
+    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+    
+    <!-- Markdown Renderer -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Code Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github-dark.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/languages/python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/languages/javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/languages/bash.min.js"></script>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/static/style.css">
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#667eea',
+                        secondary: '#764ba2',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-96 bg-base-100 border-r border-base-300 flex flex-col fixed left-0 top-0 bottom-0 z-50">
+            <!-- Logo -->
+            <div class="p-5 border-b border-base-300 bg-gradient-to-r from-primary/10 to-secondary/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-xl shadow-lg">
+                        <span class="iconify" data-icon="mdi:robot-happy"></span>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">SecureAgent</h1>
+                        <p class="text-xs text-base-content/60">Intelligent AI Assistant</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Features -->
+            <div class="flex-1 p-4 overflow-y-auto">
+                <div class="mb-6">
+                    <h3 class="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-3">Features</h3>
+                    <ul class="menu menu-sm bg-base-200 rounded-box">
+                        <li>
+                            <a class="flex items-center gap-3 py-2.5">
+                                <span class="iconify text-primary text-lg" data-icon="mdi:database-search-outline"></span>
+                                <span>RAG Knowledge Retrieval</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center gap-3 py-2.5">
+                                <span class="iconify text-secondary text-lg" data-icon="mdi:cloud-braces"></span>
+                                <span>MCP Tools &amp; Data Integration</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center gap-3 py-2.5">
+                                <span class="iconify text-accent text-lg" data-icon="mdi:shield-lock-outline"></span>
+                                <span>Attack &amp; Defense</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center gap-3 py-2.5">
+                                <span class="iconify text-info text-lg" data-icon="mdi:puzzle-outline"></span>
+                                <span>Extensible Skills System</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Model Info -->
+                <div class="mb-6">
+                    <h3 class="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-3">Model Info</h3>
+                    <div class="bg-base-200 rounded-box p-4 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-base-content/70">Model</span>
+                            <span class="text-sm font-medium text-base-content" id="modelName">Loading...</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-base-content/70">Status</span>
+                            <span class="flex items-center gap-1 text-sm" id="agentStatus">
+                                <span class="w-2 h-2 rounded-full bg-success"></span>
+                                <span class="text-base-content">Ready</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RAG toggle -->
+                <div class="mb-6">
+                    <h3 class="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-3">RAG Knowledge Base</h3>
+                    <div class="bg-base-200 rounded-box p-4 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-base-content/70">Status</span>
+                            <span class="text-sm font-medium text-base-content" id="ragStateLabel">Off</span>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline w-full" id="ragToggleBtn" title="When enabled, the agent will automatically query the local knowledge base before deciding and inject retrieved context.">
+                            <span class="iconify text-base" data-icon="mdi:database-search-outline"></span>
+                            <span id="ragToggleBtnText">Enable RAG Knowledge Base</span>
+                        </button>
+                        <p class="text-xs text-base-content/50">When enabled, documents under RAG/docs will be retrieved and used as additional context before answering.</p>
+                    </div>
+                </div>
+
+                <!-- Skills System toggle -->
+                <div class="mb-6">
+                    <h3 class="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-3">Skills System</h3>
+                    <div class="bg-base-200 rounded-box p-4 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-base-content/70">Status</span>
+                            <span class="text-sm font-medium text-base-content" id="skillsStateLabel">Off</span>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline w-full" id="skillsToggleBtn" title="When enabled, the Decision Agent system prompt will include the Skills System section and load SKILL.md metadata from the skills directory.">
+                            <span class="iconify text-base" data-icon="mdi:puzzle-outline"></span>
+                            <span id="skillsToggleBtnText">Enable Skills System</span>
+                        </button>
+                        <p class="text-xs text-base-content/50">Toggle whether the agent should load and expose skills defined under the skills directory (SKILL.md based skills).</p>
+                    </div>
+                </div>
+
+                <!-- MCP source -->
+                <div class="mb-6">
+                    <h3 class="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-3">MCP Source</h3>
+                    <div class="bg-base-200 rounded-box p-4 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-base-content/70">Current</span>
+                            <span class="text-sm font-medium text-base-content" id="mcpSourceLabel">Local MCP</span>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <button type="button" class="btn btn-sm btn-outline btn-primary w-full" id="mcpBtnLocal" data-source="local">
+                                <span class="iconify text-base" data-icon="mdi:desktop-tower-monitor"></span>
+                                Local MCP
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline btn-secondary w-full" id="mcpBtnCloud" data-source="cloud">
+                                <span class="iconify text-base" data-icon="mdi:cloud"></span>
+                                Cloud MCP (Bright Data)
+                            </button>
+                        </div>
+                        <p class="text-xs text-base-content/50" id="mcpSwitchHint">Switching will clear the current conversation.</p>
+                    </div>
+                </div>
+
+                <!-- Prompt defense (sandbox) -->
+                <div class="mb-6">
+                    <h3 class="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-3">Prompt Defense</h3>
+                    <div class="bg-base-200 rounded-box p-4 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-base-content/70">Status</span>
+                            <span class="text-sm font-medium text-base-content" id="sandboxStateLabel">Off</span>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline w-full" id="sandboxToggleBtn" title="When enabled, prompt injection attempts in web/tool outputs will be more strictly sandboxed.">
+                            <span class="iconify text-base" data-icon="mdi:shield-lock-outline"></span>
+                            <span id="sandboxToggleBtnText">Enable Prompt Defense</span>
+                        </button>
+                        <p class="text-xs text-base-content/50">When enabled, the agent will more strictly isolate prompt injection content coming from web pages and tools.</p>
+                    </div>
+                </div>
+                
+                <!-- Theme Toggle -->
+                <div class="mb-6">
+                    <h3 class="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-3">Theme</h3>
+                    <div class="flex gap-2">
+                        <button class="btn btn-sm btn-ghost flex-1" onclick="setTheme('light')">
+                            <span class="iconify" data-icon="mdi:white-balance-sunny"></span>
+                            Light
+                        </button>
+                        <button class="btn btn-sm btn-ghost flex-1" onclick="setTheme('dark')">
+                            <span class="iconify" data-icon="mdi:moon-waning-crescent"></span>
+                            Dark
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="p-4 border-t border-base-300 text-center">
+                <p class="text-xs text-base-content/50">Built with LangGraph</p>
+                <p class="text-xs text-base-content/40">The Hong Kong Polytechnic University</p>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="flex-1 ml-96 flex flex-col h-screen bg-base-200">
+            <!-- Chat Area - wider container -->
+            <div class="flex-1 flex flex-col max-w-5xl w-full mx-auto px-8 h-full">
+                <!-- Chat Header - simplified -->
+                <div class="flex justify-between items-center py-4 bg-base-200 flex-shrink-0">
+                    <h2 class="text-xl font-semibold">Chat</h2>
+                    <button class="btn btn-ghost btn-sm btn-square" id="clearBtn" title="Clear chat">
+                        <span class="iconify text-lg" data-icon="mdi:delete-outline"></span>
+                    </button>
+                </div>
+                
+                <!-- Messages Area with fade effect at top -->
+                <div class="flex-1 overflow-y-auto min-h-0 messages-container" id="chatMessages"></div>
+                
+                <!-- Input Area - redesigned with fade effect -->
+                <div class="py-4 bg-base-200 flex-shrink-0 input-area">
+                    <div class="input-container">
+                        <textarea 
+                            id="messageInput" 
+                            class="message-input"
+                            placeholder="Type your message..."
+                            rows="1"
+                        ></textarea>
+                        <button class="send-btn" id="sendBtn" disabled title="Send message" aria-label="Send message">
+                            <span class="iconify text-lg" data-icon="mdi:send"></span>
+                        </button>
+                    </div>
+                    <div class="text-center mt-2">
+                        <span class="text-xs text-base-content/40">Enter to send · Shift+Enter for new line</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <template id="welcomeTemplate">
+        <div class="welcome-message text-center py-16 animate-fade-in">
+            <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-4xl shadow-xl">
+                <span class="iconify" data-icon="mdi:robot-happy"></span>
+            </div>
+            <h3 class="text-2xl font-bold mb-3">Welcome to SecureAgent</h3>
+            <p class="text-base-content/60 mb-8">I'm an intelligent assistant with web search capabilities. I can help you:</p>
+            <div class="flex flex-wrap justify-center gap-3">
+                <button class="btn btn-outline btn-primary btn-sm gap-2 hover:scale-105 transition-transform" onclick="setInput('Hello, introduce yourself')">
+                    <span class="iconify" data-icon="mdi:chat"></span>
+                    Chat with me
+                </button>
+                <button class="btn btn-outline btn-secondary btn-sm gap-2 hover:scale-105 transition-transform" onclick="setInput('Search for the latest tech news')">
+                    <span class="iconify" data-icon="mdi:magnify"></span>
+                    Search the web
+                </button>
+                <button class="btn btn-outline btn-accent btn-sm gap-2 hover:scale-105 transition-transform" onclick="setInput('Summarize this webpage: https://www.python.org')">
+                    <span class="iconify" data-icon="mdi:file-document"></span>
+                    Fetch webpage
+                </button>
+            </div>
+        </div>
+    </template>
+    <script src="/static/app.js"></script>
+</body>
+</html>
