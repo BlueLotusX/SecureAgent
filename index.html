@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="SecureAgent: an open-source agent security verification system for constructing secure AI agent systems.">
+    <meta name="keywords" content="SecureAgent, AI Agent, Security, Adversarial Attack, LLM, PolyU">
+
+    <meta property="og:title" content="SecureAgent: Constructing Secure AI Agent Systems"/>
+    <meta property="og:description" content="An open-source agent security verification system using AI-driven adversarial methods."/>
+    <meta property="og:url" content="https://github.com/BlueLotusX/SecureAgent"/>
+    <meta property="og:image" content="static/images/secureAgent.png"/>
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="630"/>
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SecureAgent: Constructing Secure AI Agent Systems">
+    <meta name="twitter:description" content="An open-source agent security verification system using AI-driven adversarial methods.">
+    <meta name="twitter:image" content="static/images/secureAgent.png">
+
+    <title>SecureAgent: Constructing Secure AI Agent Systems</title>
+    <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+          rel="stylesheet">
+
+    <link rel="stylesheet" href="static/css/bulma.min.css">
+    <link rel="stylesheet" href="static/css/fontawesome.all.min.css">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+    <link rel="stylesheet" href="static/css/index.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script defer src="static/js/fontawesome.all.min.js"></script>
+    
+    
+    <!-- 手风琴和轮播交互脚本（优化版 - 修复计时器bug） -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            let activeItem = null;
+            const carouselInstances = new Map(); // 存储轮播实例而非单个interval
+            
+            // 初始化第一个轮播图片
+            const firstCarousel = document.querySelector('.hero.is-small .image-carousel');
+            if (firstCarousel) {
+                initCarousel(firstCarousel, 'first-carousel');
+            }
+            
+            // 手风琴交互逻辑
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                const carousel = item.querySelector('.image-carousel');
+                const carouselItems = item.querySelectorAll('.carousel-item');
+                
+                // 悬停进入时展开手风琴
+                header.addEventListener('mouseenter', function() {
+                    // 关闭之前激活的手风琴
+                    if (activeItem && activeItem !== item) {
+                        activeItem.classList.remove('active');
+                        const prevInstance = carouselInstances.get(activeItem);
+                        if (prevInstance) {
+                            prevInstance.destroy();
+                            carouselInstances.delete(activeItem);
+                        }
+                    }
+                    
+                    // 激活当前手风琴
+                    item.classList.add('active');
+                    activeItem = item;
+                    
+                    // 初始化轮播（仅当还未初始化时）
+                    if (carousel && carouselItems.length > 1 && !carouselInstances.has(item)) {
+                        initCarousel(carousel, item);
+                    }
+                });
+                
+                // 悬停离开时收起手风琴
+                item.addEventListener('mouseleave', function() {
+                    item.classList.remove('active');
+                    if (activeItem === item) {
+                        activeItem = null;
+                    }
+                    
+                    // 清理轮播实例
+                    const instance = carouselInstances.get(item);
+                    if (instance) {
+                        instance.destroy();
+                        carouselInstances.delete(item);
+                    }
+                });
+            });
+            
+            // 显示指定图片的函数
+            function showSlide(index, items, dots) {
+                items.forEach(item => item.classList.remove('active'));
+                if (items[index]) items[index].classList.add('active');
+                dots.forEach((dot, dotIndex) => {
+                    dot.classList.toggle('active', dotIndex === index);
+                });
+            }
+            
+            // 通用轮播初始化函数（返回轮播实例对象）
+            function initCarousel(container, itemKey) {
+                const items = container.querySelectorAll('.carousel-item');
+                const dots = container.querySelectorAll('.dot');
+                const prevBtn = container.querySelector('.carousel-btn-prev');
+                const nextBtn = container.querySelector('.carousel-btn-next');
+                
+                let currentIndex = 0;
+                let carouselInterval = null;
+                let isHovered = false;
+                let restartTimeout = null;
+                
+                // 显示初始图片
+                showSlide(0, items, dots);
+                
+                // 开始自动播放
+                function startAutoPlay() {
+                    // 清理旧的interval
+                    if (carouselInterval) {
+                        clearInterval(carouselInterval);
+                        carouselInterval = null;
+                    }
+                    
+                    // 创建新的interval
+                    carouselInterval = setInterval(() => {
+                        if (!isHovered) {
+                            currentIndex = (currentIndex + 1) % items.length;
+                            showSlide(currentIndex, items, dots);
+                        }
+                    }, 2000); // 固定2秒间隔
+                }
+                
+                // 停止自动播放
+                function stopAutoPlay() {
+                    if (carouselInterval) {
+                        clearInterval(carouselInterval);
+                        carouselInterval = null;
+                    }
+                    if (restartTimeout) {
+                        clearTimeout(restartTimeout);
+                        restartTimeout = null;
+                    }
+                }
+                
+                // 重新开始自动播放（用于手动切换后）
+                function restartAutoPlay() {
+                    stopAutoPlay();
+                    // 等待2秒后重新开始
+                    restartTimeout = setTimeout(() => {
+                        if (!isHovered) {
+                            startAutoPlay();
+                        }
+                    }, 2000);
+                }
+                
+                // 启动自动播放
+                startAutoPlay();
+                
+                // 点击指示点切换
+                dots.forEach((dot, index) => {
+                    dot.addEventListener('click', () => {
+                        currentIndex = index;
+                        showSlide(currentIndex, items, dots);
+                        restartAutoPlay();
+                    });
+                });
+                
+                // 上一张按钮
+                if (prevBtn) {
+                    prevBtn.addEventListener('click', () => {
+                        currentIndex = (currentIndex - 1 + items.length) % items.length;
+                        showSlide(currentIndex, items, dots);
+                        restartAutoPlay();
+                    });
+                }
+                
+                // 下一张按钮
+                if (nextBtn) {
+                    nextBtn.addEventListener('click', () => {
+                        currentIndex = (currentIndex + 1) % items.length;
+                        showSlide(currentIndex, items, dots);
+                        restartAutoPlay();
+                    });
+                }
+                
+                // 鼠标进入时暂停
+                const mouseEnterHandler = () => {
+                    isHovered = true;
+                    stopAutoPlay();
+                };
+                
+                // 鼠标离开时继续
+                const mouseLeaveHandler = () => {
+                    isHovered = false;
+                    startAutoPlay();
+                };
+                
+                container.addEventListener('mouseenter', mouseEnterHandler);
+                container.addEventListener('mouseleave', mouseLeaveHandler);
+                
+                // 创建轮播实例对象
+                const instance = {
+                    destroy: function() {
+                        stopAutoPlay();
+                        container.removeEventListener('mouseenter', mouseEnterHandler);
+                        container.removeEventListener('mouseleave', mouseLeaveHandler);
+                    }
+                };
+                
+                // 保存实例
+                if (itemKey) {
+                    carouselInstances.set(itemKey, instance);
+                }
+                
+                return instance;
+            }
+
+            // Pause tutorial video when it scrolls into view
+            const tutorialVideo = document.getElementById('tree');
+            if (tutorialVideo && 'IntersectionObserver' in window) {
+                // Ensure it is not playing by default
+                try { tutorialVideo.pause(); } catch (e) {}
+                const videoObserver = new IntersectionObserver((entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            try { tutorialVideo.pause(); } catch (e) {}
+                        }
+                    });
+                }, { threshold: 0.35 });
+                videoObserver.observe(tutorialVideo);
+            }
+        });
+    </script>
+</head>
+<body>
+
+<section class="hero">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <div class="columns is-centered">
+                <div class="column has-text-centered">
+                    <h1 class="title is-1 publication-title">SecureAgent: Constructing Secure AI Agent Systems</h1>
+                    <div class="is-size-5 publication-authors">
+                        <span class="author-block">The Hong Kong Polytechnic University (PolyU)</span>
+                    </div>
+                    <div class="subtitle is-5 has-text-grey mt-4">
+                        <span class="hero-subtitle-box">
+                            <em>A secure multi-agent platform for end-to-end attack-defense evaluation, with pluggable MCP tools, skills, and RAG knowledge integration.</em>
+                        </span>
+                    </div>
+                    <p class="is-size-6 has-text-grey hero-feature-tags">
+                        <a class="hero-feature-tag" href="#multi-agent-system">Multi-agent</a>
+                        <span class="hero-feature-sep">·</span>
+                        <a class="hero-feature-tag" href="#mcp-tools">MCP tools</a>
+                        <span class="hero-feature-sep">·</span>
+                        <a class="hero-feature-tag" href="#skill-system">Skills</a>
+                        <span class="hero-feature-sep">·</span>
+                        <a class="hero-feature-tag" href="#rag-section">RAG</a>
+                        <span class="hero-feature-sep">·</span>
+                        <a class="hero-feature-tag" href="#attack-defense-evaluation">Attack &amp; Defense</a>
+                    </p>
+                    <div class="buttons is-centered mt-5">
+                        <a class="button is-dark is-rounded is-outlined" href="#quickstart">Get Started</a>
+                        <a href="https://github.com/BlueLotusX/SecureAgent" target="_blank" rel="noopener noreferrer"
+                           class="button is-dark is-rounded">
+                            <span class="icon">
+                              <i class="fab fa-github"></i>
+                            </span>
+                            <span>View on GitHub</span>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why SecureAgent? (reusing existing content) -->
+<section class="section hero is-light uniform-text-section">
+    <div class="container is-max-desktop">
+        <div class="columns is-centered has-text-centered">
+            <div class="column is-four-fifths">
+                <h2 class="title is-3">What is SecureAgent?</h2>
+                <div class="content has-text-justified">
+                    <p>
+                        AI agents are becoming a key platform for deploying LLMs in real-world applications, with technological advances enabling automation and decision-making for complex tasks. However, their integration with critical systems (e.g., automated shopping, automated finance) introduces new security risks—uncontrollable inputs, opaque logic, and dynamic environments expose them to attacks such as fraud or workflow hijacking. Companies are in urgent need of discovering vulnerabilities in agents and building a robust security framework to ensure their secure deployment. Therefore, we developed SecureAgent. SecureAgent is an <strong>open-source</strong>, LangGraph-based <strong>multi-agent</strong> security evaluation platform that performs systematic end-to-end <strong>attack-defense</strong> testing using pluggable <strong>MCP tools </strong>, <strong>Skills</strong>, and <strong>RAG</strong> knowledge integration.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End What is SecureAgent -->
+
+<!-- Image Carousel -->
+<section class="hero is-small">
+    <div class="hero-body">
+        <div class="container">
+            <div class="carousel-wrapper">
+                <div class="image-carousel">
+                    <button class="carousel-btn carousel-btn-prev" aria-label="Previous image">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="carousel-btn carousel-btn-next" aria-label="Next image">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <div class="carousel-item">
+                        <img src="static/images/aiframework.jpg" alt="AI Framework"/>
+                        <p class="image-caption">Figure 1. Current AI agent systems suffer from various adversarial attacks and generate harmful or illegal responses.</p>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="static/images/agenthistory.png" alt="Agent History"/>
+                        <p class="image-caption">Figure 2. Major events related to AI agents and its security.</p>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="static/images/secureAgent.png" alt="Secure Agent"/>
+                        <p class="image-caption">Figure 3. An overview of the proposed secure AI agent system framework.</p>
+                    </div>
+                    <div class="carousel-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End image carousel -->
+
+<!-- Multi‑Agent System Section -->
+<section class="section hero is-light uniform-text-section" id="multi-agent-system">
+    <div class="container is-max-desktop">
+        <div class="columns is-centered has-text-centered">
+            <div class="column is-four-fifths">
+                <h2 class="title is-3">Multi-Agent System Architecture</h2>
+                <div class="content has-text-justified">
+                    <p>
+                        SecureAgent uses <strong>LangGraph</strong> to build a stateful multi-agent execution graph. Each step's input and output are explicitly modeled in the graph state, providing full transparency, debuggability, and control over the agent's reasoning process.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="pipeline-flow">
+            <div class="pipeline-step">
+                <div class="step-icon"><i class="fas fa-project-diagram"></i></div>
+                <div class="step-label">Task<br>Decomposer</div>
+            </div>
+            <div class="pipeline-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+            <div class="pipeline-step">
+                <div class="step-icon"><i class="fas fa-map"></i></div>
+                <div class="step-label">Planning</div>
+            </div>
+            <div class="pipeline-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+            <div class="pipeline-step">
+                <div class="step-icon"><i class="fas fa-brain"></i></div>
+                <div class="step-label">Decision</div>
+            </div>
+            <div class="pipeline-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+            <div class="pipeline-step">
+                <div class="step-icon"><i class="fas fa-cogs"></i></div>
+                <div class="step-label">Execute</div>
+            </div>
+            <div class="pipeline-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+            <div class="pipeline-step">
+                <div class="step-icon"><i class="fas fa-database"></i></div>
+                <div class="step-label">Memory</div>
+            </div>
+            <div class="pipeline-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+            <div class="pipeline-step">
+                <div class="step-icon"><i class="fas fa-sync-alt"></i></div>
+                <div class="step-label">Reflection</div>
+            </div>
+            <div class="pipeline-arrow"><i class="fas fa-redo"></i></div>
+            <div class="pipeline-step">
+                <div class="step-icon"><i class="fas fa-bolt"></i></div>
+                <div class="step-label">Retry</div>
+            </div>
+        </div>
+        <div class="columns is-centered">
+            <div class="column is-four-fifths">
+                <div class="feature-highlights">
+                    <div class="feature-highlight">
+                        <h4><i class="fas fa-plug"></i> Pluggable LLM</h4>
+                        <p>Use commercial APIs or local open-source models (Ollama with Qwen, Llama, etc.). The graph depends only on an abstract LLM interface.</p>
+                    </div>
+                    <div class="feature-highlight">
+                        <h4><i class="fas fa-sliders-h"></i> Configurable Nodes</h4>
+                        <p>Enable or disable reflection, memory, RAG, and skills via config flags. Add, merge, or remove graph nodes as needed.</p>
+                    </div>
+                    <div class="feature-highlight">
+                        <h4><i class="fas fa-redo-alt"></i> Auto Retry</h4>
+                        <p>When execution fails or no progress is detected, the system automatically retries with reinforced instructions before giving up.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- MCP & Tools Section -->
+<section class="section hero is-light uniform-text-section" id="mcp-tools">
+    <div class="container is-max-desktop">
+        <div class="columns is-centered has-text-centered">
+            <div class="column is-four-fifths">
+                <h2 class="title is-3">MCP Tools: Local and Cloud</h2>
+                <div class="content has-text-justified">
+                    <p>
+                        In SecureAgent, <strong>all tools are provided through MCP (Model Context Protocol)</strong>. The agent only sees tool names, descriptions, and parameter schemas—it does not care whether a tool runs locally or in the cloud. Switch between local and remote tool backends with a single config change.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="columns is-centered">
+            <div class="column is-four-fifths">
+                <div class="mode-cards">
+                    <div class="mode-card">
+                        <h4><i class="fas fa-laptop-code"></i> Local MCP Server</h4>
+                        <ul>
+                            <li>Starts via <strong>stdio</strong> from <code>mcp_server/</code></li>
+                            <li>Best for local development &amp; debugging</li>
+                            <li>Built-in tools: search, crawling, file I/O, shell</li>
+                            <li>Zero network dependency</li>
+                        </ul>
+                    </div>
+                    <div class="mode-card">
+                        <h4><i class="fas fa-cloud"></i> Cloud MCP Service</h4>
+                        <ul>
+                            <li>Connects via <strong>SSE / HTTP</strong> transport</li>
+                            <li>Ideal for shared enterprise tool services</li>
+                            <li>Same agent logic, different backend</li>
+                            <li>Switch with <code>config.mcp</code> settings</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="content has-text-justified">
+                    <p><strong>Built-in tools</strong> available out of the box:</p>
+                </div>
+                <div class="tool-grid">
+                    <div class="tool-item"><i class="fas fa-search"></i> <span>Web Search</span></div>
+                    <div class="tool-item"><i class="fas fa-search-plus"></i> <span>Deep Search + Content</span></div>
+                    <div class="tool-item"><i class="fas fa-globe"></i> <span>Web Crawler</span></div>
+                    <div class="tool-item"><i class="fab fa-chrome"></i> <span>Browser Search</span></div>
+                    <div class="tool-item"><i class="fas fa-file-alt"></i> <span>File Read / Write</span></div>
+                    <div class="tool-item"><i class="fas fa-folder-open"></i> <span>Directory Listing</span></div>
+                    <div class="tool-item"><i class="fas fa-terminal"></i> <span>Shell Commands</span></div>
+                    <div class="tool-item"><i class="fas fa-clock"></i> <span>Date &amp; Time</span></div>
+                </div>
+                <div class="content has-text-justified section-content-mt">
+                    <p>
+                        You can add custom tools by creating new modules under <code>mcp_server/tools/</code> with the <code>@tool</code> decorator and registering them in <code>server.py</code>. All tools—search engines, APIs, and automations—are simply different MCP implementations that you can freely add, remove, or replace.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Skill System Section -->
+<section class="section hero is-light uniform-text-section" id="skill-system">
+    <div class="container is-max-desktop">
+        <div class="columns is-centered has-text-centered">
+            <div class="column is-four-fifths">
+                <h2 class="title is-3">Skill System</h2>
+                <div class="content has-text-justified">
+                    <p>
+                        Skills are <strong>reusable, structured task templates</strong>—higher-level strategy plugins that the agent can select and execute for complex workflows. Instead of relying on ad-hoc prompts, you can codify proven procedures into Skills that the agent automatically invokes when appropriate.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="step-flow">
+            <div class="step-flow-item"><i class="fas fa-edit"></i> Define Skill</div>
+            <div class="step-flow-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+            <div class="step-flow-item"><i class="fas fa-cog"></i> Loader Validates</div>
+            <div class="step-flow-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+            <div class="step-flow-item"><i class="fas fa-brain"></i> Decision Selects</div>
+            <div class="step-flow-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+            <div class="step-flow-item"><i class="fas fa-play"></i> Execute End-to-End</div>
+        </div>
+        <div class="columns is-centered">
+            <div class="column is-four-fifths">
+                <div class="content has-text-justified">
+                    <p>Each Skill consists of three parts:</p>
+                    <ul>
+                        <li><strong>Metadata</strong> — name, description, priority, tags, applicable scenarios, and allowed tools</li>
+                        <li><strong>Documentation</strong> — a <code>SKILL.md</code> file that tells the LLM when and how to use this Skill</li>
+                        <li><strong>Execution Logic</strong> — Python scripts and tool-calling sequences that implement the workflow</li>
+                    </ul>
+                    <p>
+                        At startup, <code>skills/loader.py</code> scans all skill directories, validates their YAML frontmatter, and makes them available to the Decision node. You can control skill selection through whitelisting, blacklisting, and priority tuning—turning tacit knowledge into reusable, testable capability units.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- RAG Section -->
+<section class="section hero is-light uniform-text-section" id="rag-section">
+    <div class="container is-max-desktop">
+        <div class="columns is-centered has-text-centered">
+            <div class="column is-four-fifths">
+                <h2 class="title is-3">RAG: Bring Your Own Knowledge</h2>
+                <div class="content has-text-justified">
+                    <p>
+                        SecureAgent includes a lightweight <strong>RAG (Retrieval-Augmented Generation)</strong> pipeline that safely injects your document knowledge into the agent's decision process—without uncontrolled text concatenation into prompts.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="step-flow">
+            <div class="step-flow-item"><i class="fas fa-file-alt"></i> Prepare Docs</div>
+            <div class="step-flow-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+            <div class="step-flow-item"><i class="fas fa-database"></i> Build FAISS Index</div>
+            <div class="step-flow-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+            <div class="step-flow-item"><i class="fas fa-search"></i> Online Retrieval</div>
+            <div class="step-flow-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+            <div class="step-flow-item"><i class="fas fa-puzzle-piece"></i> Context Fusion</div>
+        </div>
+        <div class="columns is-centered">
+            <div class="column is-four-fifths">
+                <div class="content has-text-justified">
+                    <ul>
+                        <li><strong>Index Building</strong> — Run <code>RAG/build_index.py</code> to vectorize and chunk your Markdown / text documents using Ollama embeddings and FAISS</li>
+                        <li><strong>Smart Retrieval</strong> — During conversations, when the agent needs external knowledge, it queries the FAISS index for the most relevant document chunks</li>
+                        <li><strong>Controlled Injection</strong> — Retrieved context is fused with the current task and injected through well-defined interfaces into Decision nodes</li>
+                        <li><strong>Customizable</strong> — Replace the knowledge base, tune chunking strategies and embedding models, or control which graph nodes are allowed to use RAG</li>
+                    </ul>
+                    <p>
+                        Add your technical documentation, security policies, SOPs, or any domain-specific knowledge to give the agent accurate, grounded answers.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Attack & Defense Evaluation Section -->
+<section class="section hero is-light uniform-text-section" id="attack-defense-evaluation">
+    <div class="container is-max-desktop">
+        <div class="columns is-centered has-text-centered">
+            <div class="column is-four-fifths">
+                <h2 class="title is-3">Attack &amp; Defense Evaluation</h2>
+                <div class="content has-text-justified">
+                    <p>
+                        SecureAgent is not just another agent demo—it is a <strong>security evaluation platform</strong> designed to help you study and benchmark agent vulnerabilities in realistic environments. Test different LLMs, architectures, and tool configurations under real attack scenarios.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="columns is-centered">
+            <div class="column is-four-fifths">
+                <div class="content has-text-justified">
+                    <p class="section-subheading"><i class="fas fa-crosshairs"></i>Attack Example: Indirect Prompt Injection</p>
+                    <p>We provide crafted web pages that simulate <strong>indirect prompt injection attacks</strong>. When the agent visits these pages through its tools (web_search, web_crawler, browser_search), hidden instructions attempt to hijack the agent's behavior:</p>
+                </div>
+                <div class="demo-cards">
+                    <div class="demo-card">
+                        <h4><i class="fas fa-file-alt icon-accent"></i> Normal Page</h4>
+                        <p>A standard AI introduction page with no hidden content.</p>
+                        <a href="https://bluelotusx.github.io/ai-intro-pages/ai_intro.html" target="_blank" rel="noopener noreferrer" class="button is-small is-rounded is-outlined is-dark">View Page</a>
+                    </div>
+                    <div class="demo-card">
+                        <h4><i class="fas fa-user-secret icon-danger"></i> Injected Page</h4>
+                        <p>Same content but with hidden prompt injection—check the source code!</p>
+                        <a href="https://bluelotusx.github.io/ai-intro-pages/ai_intro_hidden.html" target="_blank" rel="noopener noreferrer" class="button is-small is-rounded is-outlined is-danger">View Page</a>
+                    </div>
+                </div>
+                <div class="content has-text-justified section-content-mt-lg">
+                    <p class="section-subheading"><i class="fas fa-shield-alt"></i>Built-in Defenses</p>
+                </div>
+                <div class="defense-list">
+                    <div class="defense-item">
+                        <div class="defense-icon"><i class="fas fa-shield-alt"></i></div>
+                        <div class="defense-text">
+                            <h4>Sandboxed Prompts</h4>
+                            <p>System prompts explicitly label and isolate external content, distinguishing user instructions from web page content to prevent blind instruction following.</p>
+                        </div>
+                    </div>
+                    <div class="defense-item">
+                        <div class="defense-icon"><i class="fas fa-clipboard-check"></i></div>
+                        <div class="defense-text">
+                            <h4>Reflection + Progress Verification</h4>
+                            <p>The Reflection node cross-checks task lists, tool call logs, and execution state to verify genuine task completion—not just trusting "the model says it's done."</p>
+                        </div>
+                    </div>
+                    <div class="defense-item">
+                        <div class="defense-icon"><i class="fas fa-lock"></i></div>
+                        <div class="defense-text">
+                            <h4>Controlled RAG &amp; Skill Injection</h4>
+                            <p>External knowledge and skills enter through well-defined interfaces, not arbitrary text concatenation into system prompts.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="content has-text-justified section-content-mt">
+                    <p>
+                        <strong>The attack-and-defense effects described above can be observed in the Video Presentation section.</strong>
+                    </p>
+                    <p>
+                        Design your own attack pages, modify defense rules, and use SecureAgent as a <strong>systematic security evaluation platform</strong> for benchmarking agent robustness across different configurations.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quickstart Section -->
+<section class="section hero is-light uniform-text-section" id="quickstart">
+    <div class="container is-max-desktop">
+        <div class="columns is-centered has-text-centered">
+            <div class="column is-four-fifths">
+                <h2 class="title is-3">Quickstart</h2>
+                <div class="content has-text-justified">
+                    <p>Get SecureAgent running in three steps. You need <strong>Python 3.10+</strong> and an LLM endpoint (local Ollama, cloud-hosted open-source models, or a commercial API).</p>
+                    <div class="buttons is-centered mt-4">
+                        <a href="https://github.com/BlueLotusX/SecureAgent" target="_blank" rel="noopener noreferrer"
+                           class="button is-dark is-rounded"
+                           aria-label="View SecureAgent source code on GitHub">
+                            <span class="icon">
+                                <i class="fab fa-github"></i>
+                            </span>
+                            <span>View on GitHub</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="columns is-centered">
+            <div class="column is-four-fifths">
+                <div class="content has-text-justified">
+                    <p class="section-subheading">1. Install Dependencies</p>
+                    <div class="code-block">
+                        <span class="code-comment"># Clone the repository</span><br>
+                        <span class="code-prompt">$</span> git clone https://github.com/BlueLotusX/SecureAgent.git<br>
+                        <span class="code-prompt">$</span> cd SecureAgent<br><br>
+                        <span class="code-comment"># Install dependencies (use a virtualenv)</span><br>
+                        <span class="code-prompt">$</span> pip install -r requirements.txt<br><br>
+                        <span class="code-comment"># Optional: browser-based search</span><br>
+                        <span class="code-prompt">$</span> pip install playwright &amp;&amp; playwright install chromium
+                    </div>
+
+                    <p class="section-subheading section-content-mt-lg">2. Configure</p>
+                    <p>Edit <code>config.py</code> to set your LLM and MCP backends:</p>
+                    <div class="code-block">
+                        <span class="code-comment"># config.py — LLMConfig</span><br>
+                        base_url = "http://127.0.0.1:11434" &nbsp;<span class="code-comment"># Ollama default</span><br>
+                        model = "qwen2.5" &nbsp;<span class="code-comment"># or any compatible model</span><br><br>
+                        <span class="code-comment"># config.py — MCPConfig</span><br>
+                        transport = "stdio" &nbsp;<span class="code-comment"># "stdio" for local, "sse" for cloud</span>
+                    </div>
+
+                    <p class="section-subheading section-content-mt-lg">3. Launch</p>
+                    <div class="code-block">
+                        <span class="code-comment"># Start the Web UI</span><br>
+                        <span class="code-prompt">$</span> python webui/app.py<br>
+                        <span class="code-comment"># → Open http://127.0.0.1:7860 in your browser</span><br><br>
+                        <span class="code-comment"># Or bind to a custom host/port</span><br>
+                        <span class="code-prompt">$</span> python webui/app.py --host 0.0.0.0 --port 8080
+                    </div>
+
+                    <p class="section-content-mt">
+                        The Web UI will start an MCP server in the background, create a singleton SecureAgent instance, and be ready for conversations with the full multi-agent + tools + RAG + skills + defense stack.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Advanced Accordion Component (moved later per layout plan) -->
+<section class="section hero is-light">
+    <div class="container is-max-desktop">
+        <div class="columns is-centered has-text-centered">
+            <div class="column is-four-fifths">
+                <h2 class="title is-3">Research Foundations</h2>
+            </div>
+        </div>
+        <div class="accordion-container">
+            <div class="accordion">
+                <!-- Accordion Item 1 -->
+                <div class="accordion-item" data-section="1">
+                    <div class="accordion-header">
+                        <h2 class="accordion-title">Vulnerabilities in the Environment of AI Agent</h2>
+                        <div class="accordion-indicator">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-layout">
+                            <div class="accordion-content-wrapper">
+                                <div class="accordion-text">
+                                    <div class="content has-text-justified">
+                                        <p>
+                                            Attackers can manipulate the Agent's environment (such as website images or knowledge bases) by generating adversarial samples through diffusion models, causing the Agent to perform malicious operations. However, although diffusion models are good at generating high-quality images, their potential as adversarial tools, especially in black-box attacks (without access to the target model or training data), has not been fully studied. In this paper, we investigate the adversarial capabilities of diffusion models by conducting no-box attacks solely using data generated by diffusion models.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="accordion-image">
+                                    <div class="image-carousel">
+                                        <button class="carousel-btn carousel-btn-prev" aria-label="Previous image">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+                                        <button class="carousel-btn carousel-btn-next" aria-label="Next image">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                        <div class="carousel-item">
+                                            <img src="static/images/no-box_adversarial_attacks.png" alt="No-box adversarial attacks"/>
+                                            <p class="image-caption">Figure 4. The attack pipeline of our proposed no-box adversarial attacks.</p>
+                                        </div>
+                                        <div class="carousel-item">
+                                            <img src="static/images/Diffusion_Models_as_Strong_Adversaries_4.png" alt="Diffusion models comparison"/>
+                                            <p class="image-caption">Figure 5. Comparisons of no-box adversarial examples with our method and Li et al.'s method.</p>
+                                        </div>
+                                        <div class="carousel-dots">
+                                            <span class="dot active" data-slide="0"></span>
+                                            <span class="dot" data-slide="1"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-links">
+                                <div class="publication-links">
+                                    <span class="link-block">
+                                        <a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10804100" target="_blank" rel="noopener noreferrer"
+                                        class="external-link button is-normal is-rounded is-dark">
+                                        <span class="icon">
+                                          <i class="fas fa-file-pdf"></i>
+                                        </span>
+                                        <span>Paper</span>
+                                      </a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accordion Item 2 -->
+                <div class="accordion-item" data-section="2">
+                    <div class="accordion-header">
+                        <h2 class="accordion-title">Attack through the Input of AI Agent</h2>
+                        <div class="accordion-indicator">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-layout">
+                            <div class="accordion-content-wrapper">
+                                <div class="accordion-text">
+                                    <div class="content has-text-justified">
+                                        <p>
+                                            AI Agent has vulnerabilities in the input link. Attackers can use the diffusion model to generate adversarial samples and destroy the perception ability of the agent by interfering with the input layer data of the agent. So we proposed AdvDiff. Compared with traditional methods (such as PGD gradient injection), AdvDiff proposes two new adversarial guidance techniques to achieve explainable adversarial sampling in the reverse generation process of the diffusion model, which can generate more realistic and high-quality adversarial samples. Experiments show that AdvDiff's attack effect and generation quality on MNIST and ImageNet are better than existing unrestricted adversarial attack methods.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="accordion-image">
+                                    <div class="image-carousel">
+                                        <button class="carousel-btn carousel-btn-prev" aria-label="Previous image">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+                                        <button class="carousel-btn carousel-btn-next" aria-label="Next image">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                        <div class="carousel-item">
+                                            <img src="static/images/AdvDiff_1.png" alt="AdvDiff guidance techniques"/>
+                                            <p class="image-caption">Figure 6. The two new guidance techniques in our AdvDiff to generate unrestricted adversarial examples.</p>
+                                        </div>
+                                        <div class="carousel-item">
+                                            <img src="static/images/AdvDiff_2.png" alt="AdvDiff comparisons"/>
+                                            <p class="image-caption">Figure 7. Comparisons of unrestricted adversarial attacks between GANs and diffusion models on two datasets.</p>
+                                        </div>
+                                        <div class="carousel-dots">
+                                            <span class="dot active" data-slide="0"></span>
+                                            <span class="dot" data-slide="1"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-links">
+                                <div class="publication-links">
+                                    <span class="link-block">
+                                        <a href="https://link.springer.com/chapter/10.1007/978-3-031-72952-2_6" target="_blank" rel="noopener noreferrer"
+                                        class="external-link button is-normal is-rounded is-dark">
+                                        <span class="icon">
+                                          <i class="fas fa-file-pdf"></i>
+                                        </span>
+                                        <span>Paper</span>
+                                      </a>
+                                    </span>
+                                    <span class="link-block">
+                                        <a href="https://github.com/EricDai0/advdiff" target="_blank" rel="noopener noreferrer"
+                                        class="external-link button is-normal is-rounded is-dark">
+                                        <span class="icon">
+                                          <i class="fab fa-github"></i>
+                                        </span>
+                                        <span>Code</span>
+                                      </a>
+                                    </span>
+                                    <span class="link-block">
+                                        <a href="https://arxiv.org/pdf/2307.12499" target="_blank" rel="noopener noreferrer"
+                                      class="external-link button is-normal is-rounded is-dark">
+                                      <span class="icon">
+                                        <i class="ai ai-arxiv"></i>
+                                      </span>
+                                      <span>arXiv</span>
+                                    </a>
+                                  </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accordion Item 3 -->
+                <div class="accordion-item" data-section="3">
+                    <div class="accordion-header">
+                        <h2 class="accordion-title">Vulnerabilities in the Cross Agent</h2>
+                        <div class="accordion-indicator">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-layout">
+                            <div class="accordion-content-wrapper">
+                                <div class="accordion-text">
+                                    <div class="content has-text-justified">
+                                        <p>
+                                             There may be vulnerabilities in different parts of a single agent, as well as between multiple agents. Attackers can generate adversarial samples with higher transfer rates to interfere with agents in various scenarios. Therefore, we propose the StyleLess method, which uses a stylized network as a proxy model and perturbs adaptive instance normalization to eliminate style features in adversarial samples, thereby significantly improving the attack transferability of adversarial samples. Experiments show that its transfer attack performance is better than existing methods, and it is compatible with a variety of attack techniques to achieve better results.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="accordion-image">
+                                    <div class="image-carousel">
+                                        <button class="carousel-btn carousel-btn-prev" aria-label="Previous image">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+                                        <button class="carousel-btn carousel-btn-next" aria-label="Next image">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                        <div class="carousel-item">
+                                            <img src="static/images/styless_1.png" alt="StyLess attack overview"/>
+                                            <p class="image-caption">Figure 8. An overview of our StyLess attack.</p>
+                                        </div>
+                                        <div class="carousel-item">
+                                            <img src="static/images/styless_2.png" alt="StyLess algorithm"/>
+                                            <p class="image-caption">Figure 9. Style-Less Perturbations (StyLess) Algorithm</p>
+                                        </div>
+                                        <div class="carousel-dots">
+                                            <span class="dot active" data-slide="0"></span>
+                                            <span class="dot" data-slide="1"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-links">
+                                <div class="publication-links">
+                                    <span class="link-block">
+                                        <a href="https://github.com/uhiu/StyLess" target="_blank" rel="noopener noreferrer"
+                                        class="external-link button is-normal is-rounded is-dark">
+                                        <span class="icon">
+                                          <i class="fab fa-github"></i>
+                                        </span>
+                                        <span>Code</span>
+                                      </a>
+                                    </span>
+                                    <span class="link-block">
+                                      <a href="https://arxiv.org/abs/2304.11579" target="_blank" rel="noopener noreferrer"
+                                      class="external-link button is-normal is-rounded is-dark">
+                                      <span class="icon">
+                                        <i class="ai ai-arxiv"></i>
+                                      </span>
+                                      <span>arXiv</span>
+                                    </a>
+                                  </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Video Presentation -->
+
+<section class="section hero is-light uniform-text-section">
+    <div class="container is-max-desktop">
+        <div class="columns is-centered has-text-centered">
+            <div class="column is-four-fifths">
+                <h2 class="title is-3">Video Presentation</h2>
+                <div class="content has-text-justified">
+                    <p>
+                        The video demonstrates SecureAgent's Web UI and how different modules are used during the end-to-end workflow.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="columns is-centered video-row">
+            <div class="column">
+                <div class="video-container">
+                    <video poster="" id="tree" controls muted preload="metadata">
+                        <source src="static/videos/SecureAgent.mp4"
+                                type="video/mp4">
+                    </video>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Team Section -->
+<section class="section hero uniform-text-section">
+    <div class="container is-max-desktop">
+        <div class="columns is-centered has-text-centered">
+            <div class="column is-four-fifths">
+                <h2 class="title is-3">Our Team</h2>
+                <div class="content has-text-justified">
+                    <p>
+                        Meet the talented individuals behind SecureAgent and get in touch with us for collaboration.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="columns is-centered team-cards">
+            <!-- Prof. Bin Xiao -->
+            <div class="column is-one-third">
+                <div class="team-card">
+                    <h3 class="team-name">Prof. Bin Xiao</h3>
+                    <p class="team-role">Supervisor</p>
+                    <p class="team-description">Supervise the whole project.</p>
+                    <div class="team-contact">
+                        <p><i class="fas fa-envelope"></i> <a href="mailto:b.xiao@polyu.edu.hk">b.xiao@polyu.edu.hk</a></p>
+                        <p><i class="fas fa-globe"></i> <a href="https://web.comp.polyu.edu.hk/csbxiao/index.html" target="_blank" rel="noopener noreferrer">Personal Webpage</a></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Xixi Zheng -->
+            <div class="column is-one-third">
+                <div class="team-card">
+                    <h3 class="team-name">Xixi Zheng</h3>
+                    <p class="team-role">Full-stack Developer</p>
+                    <p class="team-description">Responsible for the end-to-end design and implementation of the SecureAgent project, including the multi-agent system, backend services, web applications, supporting infrastructure, and the project introduction page.</p>
+                </div>
+            </div>
+            <!-- Xiangyu He -->
+            <div class="column is-one-third">
+                <div class="team-card">
+                    <h3 class="team-name">Xiangyu He</h3>
+                    <p class="team-role">Project Intro Web Developer</p>
+                    <p class="team-description">Responsible for the design of the project introduction website.</p>
+                </div>
+            </div>
+        </div>
+        <!-- Second Row -->
+        <div class="columns is-centered team-cards team-cards-row2">
+            <!-- Dong Wang -->
+            <div class="column is-one-third">
+                <div class="team-card">
+                    <h3 class="team-name">Dong Wang</h3>
+                    <p class="team-role">AI Agent Security Specialist</p>
+                    <p class="team-description">Expert in AI Agent security.</p>
+                </div>
+            </div>
+            <!-- Wenbin Zhai -->
+            <div class="column is-one-third">
+                <div class="team-card">
+                    <h3 class="team-name">Wenbin Zhai</h3>
+                    <p class="team-role">AI Agent Security Specialist</p>
+                    <p class="team-description">Expert in AI Agent security.</p>
+                </div>
+            </div>
+            <!-- Yiming Cao -->
+            <div class="column is-one-third">
+                <div class="team-card">
+                    <h3 class="team-name">Yiming Cao</h3>
+                    <p class="team-role">AI Agent Security Specialist</p>
+                    <p class="team-description">Expert in AI Agent security.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End Our Team Section -->
+
+<footer class="footer">
+    <div class="container">
+        <div class="columns is-centered">
+            <div class="column is-8">
+                <div class="content">
+
+                    <p>
+                        This project is built on <a href="https://github.com/langchain-ai/langgraph" target="_blank" rel="noopener noreferrer">LangGraph</a>.
+                        Thanks to the open-source community. SecureAgent’s framework and implementation are our own contributions for end-to-end agent security evaluation.
+                    </p>
+
+                    <p>
+                        This page is our own original work. 
+                        You are free to borrow the source code of this website, we just ask that you link back to this
+                        page in the footer.
+                    </p>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
+
